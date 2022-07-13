@@ -16,6 +16,7 @@ void belmanFord(int *grafo, int vertInicial, int vertFinal, int tamanhoGrafo, in
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
     dist[vertInicial] = 0;
     pq.push({dist[vertInicial],vertInicial});
+    
     while(!pq.empty()){
         pair<int,int> peso_Vertice = pq.top();
         pq.pop();
