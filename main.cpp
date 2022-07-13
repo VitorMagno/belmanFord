@@ -20,7 +20,7 @@ void belmanFord(int *grafo, int vertInicial, int vertFinal, int tamanhoGrafo, in
     while(!pq.empty()){
         pair<int,int> peso_Vertice = pq.top();
         pq.pop();
-        relaxamento()
+        relaxamento();
     }
     return;
 }
