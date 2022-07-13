@@ -3,16 +3,28 @@
 #include<string>
 #include<sstream>
 #include<queue>
+#include<vector>
+#include<climits>
 
 using namespace std;
-void belmanFord(int **grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int *dist, int *pais){
-
+void belmanFord(int *grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int *dist, int *pais){
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    pq.push({0,vertInicial});
+    while(!pq.empty()){
+        pair<int,int> peso_Vertice = pq.top();
+        pq.pop();
+        
+    }
+    return;
 }
 
-void solutions (int **grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo){
-    int dist[tamanhoGrafo] = 100000;
-    int pais[tamanhoGrafo] = -1;
-    
+void solutions (int *grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo){
+    int dist[tamanhoGrafo];
+    int pais[tamanhoGrafo];
+    for (int i = 0; i < tamanhoGrafo; i++){
+        dist[i] = 100000;
+        pais[i] = -1;
+    }
     belmanFord(grafo, vertInicial, vertFinal, tamanhoGrafo, &dist[0], &pais[0]);
     
     if(write && orderSolution){
@@ -33,7 +45,7 @@ void solutions (int **grafo, bool write, string outputFile, bool orderSolution, 
             }
         }
         writeFile << "peso do menor caminho: "<< sumCaminho << endl;
-        out.close();
+        writeFile.close();
         return;
     }
     if(orderSolution){
@@ -56,7 +68,7 @@ int main(int argc, char const *argv[]){
     int indiceFinal = 999;
     int tamanhoGrafo = 0;
     int ordemGrafo = 0;
-    int **ptrGrafo = NULL;
+    int *ptrGrafo = NULL;
 
     const int BUFFER_SIZE = 8;
     char buffer[BUFFER_SIZE];
@@ -92,13 +104,14 @@ int main(int argc, char const *argv[]){
             
             int grafo[tamanhoGrafo+1][tamanhoGrafo+1];
             ptrGrafo = &grafo[0][0];
+            indiceFinal = ordemGrafo+1;
             
             for(int i = 0; i < tamanhoGrafo+1; i++){
                 for(int j = 0; j < tamanhoGrafo+1; j++){
-                    Grafo[i][j] = INT_MAX;
+                    grafo[i][j] = INT_MAX;
                 }
             }
-            while (!file_input.fail()){
+            while (!fileInput.fail()){
                 fileInput.getline(buffer, BUFFER_SIZE);
                 
                 if(fileInput.fail()){
