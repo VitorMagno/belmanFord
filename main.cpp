@@ -7,13 +7,19 @@
 #include<climits>
 
 using namespace std;
+
+int relaxamento(int vertOrigem, int vertDestino, int peso){
+
+}
+
 void belmanFord(int *grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int *dist, int *pais){
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
-    pq.push({0,vertInicial});
+    dist[vertInicial] = 0;
+    pq.push({dist[vertInicial],vertInicial});
     while(!pq.empty()){
         pair<int,int> peso_Vertice = pq.top();
         pq.pop();
-        
+        relaxamento()
     }
     return;
 }
@@ -21,10 +27,12 @@ void belmanFord(int *grafo, int vertInicial, int vertFinal, int tamanhoGrafo, in
 void solutions (int *grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo){
     int dist[tamanhoGrafo];
     int pais[tamanhoGrafo];
+
     for (int i = 0; i < tamanhoGrafo; i++){
         dist[i] = 100000;
         pais[i] = -1;
     }
+
     belmanFord(grafo, vertInicial, vertFinal, tamanhoGrafo, &dist[0], &pais[0]);
     
     if(write && orderSolution){
@@ -37,6 +45,7 @@ void solutions (int *grafo, bool write, string outputFile, bool orderSolution, i
         ofstream writeFile;
         writeFile.open(outputFile, ofstream::out);
         int sumCaminho=0;
+
         for(int i = vertInicial; i < vertFinal; i++){
             if(dist[i] == 100000){
                 continue;
@@ -44,6 +53,7 @@ void solutions (int *grafo, bool write, string outputFile, bool orderSolution, i
                 sumCaminho += dist[i];
             }
         }
+
         writeFile << "peso do menor caminho: "<< sumCaminho << endl;
         writeFile.close();
         return;
@@ -51,6 +61,7 @@ void solutions (int *grafo, bool write, string outputFile, bool orderSolution, i
     if(orderSolution){
         return;
     }
+
     int sumCaminho=0;
     for(int i = vertInicial; i < vertFinal; i++){
         if(dist[i] == 100000){
@@ -59,6 +70,7 @@ void solutions (int *grafo, bool write, string outputFile, bool orderSolution, i
             sumCaminho += dist[i];
         }
     }
+
     cout << "peso do menor caminho: "<< sumCaminho << endl;
     return;
 }
