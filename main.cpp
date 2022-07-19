@@ -8,11 +8,11 @@
 
 using namespace std;
 
-int relaxamento(int vertOrigem, int vertDestino, int peso){
-
+int relaxamento(int vertOrigem, int vertDestino, int peso, int* dist){
+    //if()
 }
 
-void belmanFord(int *grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int *dist, int *pais){
+void belmanFord(int** grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int* dist, int *pais){
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
     dist[vertInicial] = 0;
     pq.push({dist[vertInicial],vertInicial});
@@ -20,12 +20,20 @@ void belmanFord(int *grafo, int vertInicial, int vertFinal, int tamanhoGrafo, in
     while(!pq.empty()){
         pair<int,int> peso_Vertice = pq.top();
         pq.pop();
-        relaxamento();
+        for(int i  = 1; i < tamanhoGrafo; i++){
+            if(grafo[peso_Vertice.second][i] != INT_MAX){
+                if(dist[i]> dist[i] + grafo[peso_Vertice.second][i]){
+                    dist[i] = dist[i] + grafo[peso_Vertice.second][i];
+                    pais[i] = i;
+                    pq.push({dist[i],i});
+                }
+            }
+        }
     }
     return;
 }
 
-void solutions (int *grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo){
+void solutions (int** grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo){
     int dist[tamanhoGrafo];
     int pais[tamanhoGrafo];
 
@@ -81,8 +89,7 @@ int main(int argc, char const *argv[]){
     int indiceFinal = 999;
     int tamanhoGrafo = 0;
     int ordemGrafo = 0;
-    int *ptrGrafo = NULL;
-
+    int** grafo;
     const int BUFFER_SIZE = 8;
     char buffer[BUFFER_SIZE];
     
@@ -115,8 +122,13 @@ int main(int argc, char const *argv[]){
             ordemGrafo = atoi(&buffer[0]); // qtd vertices
             tamanhoGrafo = atoi(&buffer[2]); // qtd arestas
             
-            int grafo[tamanhoGrafo+1][tamanhoGrafo+1];
-            ptrGrafo = &grafo[0][0];
+            //int grafo[tamanhoGrafo + 1][tamanhoGrafo+1]; 
+            //ptrgrafo = &grafo[0][0];
+            grafo = new int* [tamanhoGrafo+1];
+            for(int i = 0; i < tamanhoGrafo+1; i++){
+                grafo[i] = new int [tamanhoGrafo+1];
+            };
+
             indiceFinal = ordemGrafo+1;
             
             for(int i = 0; i < tamanhoGrafo+1; i++){
@@ -153,7 +165,8 @@ int main(int argc, char const *argv[]){
             orderSolution = true;
         }
     }
-    solutions(ptrGrafo, write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo);
+    solutions(grafo, write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo);
+    free(grafo);
     return 0;
     
 }
