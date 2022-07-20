@@ -8,22 +8,20 @@
 
 using namespace std;
 
-int relaxamento(int vertOrigem, int vertDestino, int peso, int* dist){
-    //if()
-}
-
 void belmanFord(int** grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int* dist, int *pais){
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
     dist[vertInicial] = 0;
     pq.push({dist[vertInicial],vertInicial});
-    
     while(!pq.empty()){
-        pair<int,int> peso_Vertice = pq.top();
+        pair<int,int> vprioridade = pq.top(); //peso = .first, vertice = .second
         pq.pop();
+        if (vprioridade.second == vertFinal){
+            break;
+        }
         for(int i  = 1; i < tamanhoGrafo; i++){
-            if(grafo[peso_Vertice.second][i] != INT_MAX){
-                if(dist[i]> dist[i] + grafo[peso_Vertice.second][i]){
-                    dist[i] = dist[i] + grafo[peso_Vertice.second][i];
+            if(grafo[vprioridade.second][i] != INT_MAX){
+                if(dist[i]> vprioridade.first + grafo[vprioridade.second][i]){ // distancia do vizinho do vertice atual > dist ate o atual + dist pro vizinho no grafo
+                    dist[i] = vprioridade.first + grafo[vprioridade.second][i];
                     pais[i] = i;
                     pq.push({dist[i],i});
                 }
@@ -68,6 +66,7 @@ void solutions (int** grafo, bool write, string outputFile, bool orderSolution, 
         return;
     }
     if(orderSolution){
+        //desenvolver
         return;
     }
 
