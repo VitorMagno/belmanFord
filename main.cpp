@@ -7,40 +7,59 @@
 #include<climits>
 
 using namespace std;
-
-void belmanFord(int** grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int* dist, int *pais){
-    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
-    dist[vertInicial] = 0;
-    pq.push({dist[vertInicial],vertInicial});
-    while(!pq.empty()){
-        pair<int,int> vprioridade = pq.top(); //peso = .first, vertice = .second
-        pq.pop();
-        if (vprioridade.second == vertFinal){
-            break;
-        }
-        for(int i  = 1; i < tamanhoGrafo; i++){
-            if(grafo[vprioridade.second][i] != INT_MAX){
-                if(dist[i]> vprioridade.first + grafo[vprioridade.second][i]){ // distancia do vizinho do vertice atual > dist ate o atual + dist pro vizinho no grafo
-                    dist[i] = vprioridade.first + grafo[vprioridade.second][i];
-                    pais[i] = i;
-                    pq.push({dist[i],i});
-                }
-            }
-        }
-    }
+void relaxamento(int* dist, int* pais, pair<int,int>vprioridade, int** grafo, int i){
+    dist[i] = vprioridade.first + grafo[vprioridade.second][i];
+    pais[i] = vprioridade.second;
     return;
 }
 
-void solutions (int** grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo){
-    int dist[tamanhoGrafo];
-    int pais[tamanhoGrafo];
+bool belmanFord(int** grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo, int* dist, int *pais){
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    dist[vertInicial] = 0;
+    bool alreadyQueued [1000];
+    for(int i = 0; i < ordemGrafo + 1; i++){
+        alreadyQueued[i] = false;
+    }
+    pq.push({dist[vertInicial],vertInicial});
+    while(true){
+        pair<int,int> vprioridade = pq.top(); //peso = .first, vertice = .second
+        pq.pop();
+        /*if (vprioridade.second == vertFinal){
+            break;
+        }*/
+        if (vprioridade.second < ordemGrafo + 1){
+            for(int i  = 1; i < ordemGrafo+1; i++){
+                if(grafo[vprioridade.second][i] != INT_MAX){
+                    if(dist[i]> vprioridade.first + grafo[vprioridade.second][i]){ // distancia do vizinho do vertice atual > dist ate o atual + dist pro vizinho no grafo
+                        relaxamento(dist, pais, vprioridade, grafo, i);
+                        pq.push({dist[i],i});
+                    }
+                }
+            }
+        }
+        else{
+            if(pq.empty()){
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+}
 
-    for (int i = 0; i < tamanhoGrafo; i++){
+void solutions (int** grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo){
+    int dist[ordemGrafo+1];
+    int pais[ordemGrafo+1];
+
+    for (int i = 0; i < ordemGrafo+1; i++){
         dist[i] = 100000;
         pais[i] = -1;
     }
 
-    belmanFord(grafo, vertInicial, vertFinal, tamanhoGrafo, &dist[0], &pais[0]);
+    if(!belmanFord(grafo, vertInicial, vertFinal, tamanhoGrafo, ordemGrafo, &dist[0], &pais[0])){
+        cout << "grafo possui ciclo negativo"<<endl;
+    }
     
     if(write && orderSolution){
         ofstream writeFile;
@@ -124,14 +143,14 @@ int main(int argc, char const *argv[]){
             //int grafo[tamanhoGrafo + 1][tamanhoGrafo+1]; 
             //ptrgrafo = &grafo[0][0];
             grafo = new int* [tamanhoGrafo+1];
-            for(int i = 0; i < tamanhoGrafo+1; i++){
-                grafo[i] = new int [tamanhoGrafo+1];
+            for(int i = 0; i < ordemGrafo+1; i++){
+                grafo[i] = new int [ordemGrafo+1];
             };
 
             indiceFinal = ordemGrafo+1;
             
             for(int i = 0; i < tamanhoGrafo+1; i++){
-                for(int j = 0; j < tamanhoGrafo+1; j++){
+                for(int j = 0; j < ordemGrafo+1; j++){
                     grafo[i][j] = INT_MAX;
                 }
             }
@@ -164,7 +183,7 @@ int main(int argc, char const *argv[]){
             orderSolution = true;
         }
     }
-    solutions(grafo, write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo);
+    solutions(grafo, write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo, ordemGrafo);
     free(grafo);
     return 0;
     
