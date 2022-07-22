@@ -7,13 +7,13 @@
 #include<climits>
 
 using namespace std;
-void relaxamento(int* dist, int* pais, int* grafo, int i, int j){
-    dist[j] = dist[i] + grafo[i*j];
+void relaxamento(int* dist, int* pais, int* grafo[1000][1000], int i, int j){
+    dist[j] = dist[i] + *grafo[i][j];
     pais[j] = i;
     return;
 }
 
-bool belmanFord(int* grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo, int* dist, int *pais){
+bool belmanFord(int* grafo[1000][1000], int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo, int* dist, int *pais){
     int visitados[ordemGrafo+1][ordemGrafo+1] = {};
     /*for (int i  = 0; i < ordemGrafo + 1; i++){
         for (int j = 0; j < ordemGrafo + 1; j++){
@@ -24,9 +24,9 @@ bool belmanFord(int* grafo, int vertInicial, int vertFinal, int tamanhoGrafo, in
     pais[vertInicial] = vertInicial;
     for (int i = 1; i < ordemGrafo+1; i++){
         for (int j = 1; j < ordemGrafo+1; j++){
-            if (grafo[i*j] != 0){
-                if(dist[j] == 100000) dist[j] = 0;
-                if(dist[j] > dist[i] + grafo[i*j]){
+            if (grafo[i][j] != 0){
+                if(dist[j] > dist[i] + *grafo[i][j]){
+                    if(dist[j] == 100000) dist[j] = 0;
                     visitados[i][j] = 1;
                     relaxamento(dist, pais, grafo, i, j); // i = vertice origem do arco, j = vertice destino do arco
                 }
@@ -35,8 +35,8 @@ bool belmanFord(int* grafo, int vertInicial, int vertFinal, int tamanhoGrafo, in
     }
     for (int i = 1; i < ordemGrafo+1; i++){
         for (int j = 1; j < ordemGrafo+1; j++){
-            if (grafo[i*j] != INT_MAX){
-                if(dist[j] > dist[i] + grafo[i*j]){
+            if (*grafo[i][j] != INT_MAX){
+                if(dist[j] > dist[i] + *grafo[i][j]){
                     return false;
                 }
             }
@@ -45,7 +45,7 @@ bool belmanFord(int* grafo, int vertInicial, int vertFinal, int tamanhoGrafo, in
     return true;
 }
 
-void solutions (int* grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo){
+void solutions (int* grafo[1000][1000], bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo){
     int dist[ordemGrafo+1];
     int pais[ordemGrafo+1];
     for (int i = 0; i < ordemGrafo+1; i++){
@@ -138,6 +138,7 @@ int main(int argc, char const *argv[]){
     int tamanhoGrafo = 0;
     int ordemGrafo = 0;
     int grafo[1000][1000] = {};
+    int *ptr = &grafo[0][0];
     const int BUFFER_SIZE = 8;
     char buffer[BUFFER_SIZE];
     
@@ -215,7 +216,7 @@ int main(int argc, char const *argv[]){
             return 0;
         }
     }
-    solutions(&grafo[0][0], write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo, ordemGrafo);
+    solutions(ptr, write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo, ordemGrafo);
     return 0;
     
 }
