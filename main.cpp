@@ -7,63 +7,72 @@
 #include<climits>
 
 using namespace std;
-void relaxamento(int* dist, int* pais, pair<int,int>vprioridade, int** grafo, int i){
-    dist[i] = vprioridade.first + grafo[vprioridade.second][i];
-    pais[i] = vprioridade.second;
+void relaxamento(int* dist, int* pais, int* grafo, int i, int j){
+    dist[j] = dist[i] + grafo[i*j];
+    pais[j] = i;
     return;
 }
 
-bool belmanFord(int** grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo, int* dist, int *pais){
-    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+bool belmanFord(int* grafo, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo, int* dist, int *pais){
+    int visitados[ordemGrafo+1][ordemGrafo+1] = {};
+    /*for (int i  = 0; i < ordemGrafo + 1; i++){
+        for (int j = 0; j < ordemGrafo + 1; j++){
+            visitados[i][j] = 0;
+        }
+    }*/
     dist[vertInicial] = 0;
-    bool alreadyQueued [1000];
-    for(int i = 0; i < ordemGrafo + 1; i++){
-        alreadyQueued[i] = false;
-    }
-    pq.push({dist[vertInicial],vertInicial});
-    while(true){
-        pair<int,int> vprioridade = pq.top(); //peso = .first, vertice = .second
-        pq.pop();
-        /*if (vprioridade.second == vertFinal){
-            break;
-        }*/
-        if (vprioridade.second < ordemGrafo + 1){
-            for(int i  = 1; i < ordemGrafo+1; i++){
-                if(grafo[vprioridade.second][i] != INT_MAX){
-                    if(dist[i]> vprioridade.first + grafo[vprioridade.second][i]){ // distancia do vizinho do vertice atual > dist ate o atual + dist pro vizinho no grafo
-                        relaxamento(dist, pais, vprioridade, grafo, i);
-                        pq.push({dist[i],i});
-                    }
+    pais[vertInicial] = vertInicial;
+    for (int i = 1; i < ordemGrafo+1; i++){
+        for (int j = 1; j < ordemGrafo+1; j++){
+            if (grafo[i*j] != 0){
+                if(dist[j] == 100000) dist[j] = 0;
+                if(dist[j] > dist[i] + grafo[i*j]){
+                    visitados[i][j] = 1;
+                    relaxamento(dist, pais, grafo, i, j); // i = vertice origem do arco, j = vertice destino do arco
                 }
             }
         }
-        else{
-            if(pq.empty()){
-                return true;
-            }
-            else {
-                return false;
+    }
+    for (int i = 1; i < ordemGrafo+1; i++){
+        for (int j = 1; j < ordemGrafo+1; j++){
+            if (grafo[i*j] != INT_MAX){
+                if(dist[j] > dist[i] + grafo[i*j]){
+                    return false;
+                }
             }
         }
     }
+    return true;
 }
 
-void solutions (int** grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo){
+void solutions (int* grafo, bool write, string outputFile, bool orderSolution, int vertInicial, int vertFinal, int tamanhoGrafo, int ordemGrafo){
     int dist[ordemGrafo+1];
     int pais[ordemGrafo+1];
-
     for (int i = 0; i < ordemGrafo+1; i++){
         dist[i] = 100000;
         pais[i] = -1;
     }
-
-    if(!belmanFord(grafo, vertInicial, vertFinal, tamanhoGrafo, ordemGrafo, &dist[0], &pais[0])){
-        cout << "grafo possui ciclo negativo"<<endl;
+    bool respo = belmanFord(grafo, vertInicial, vertFinal, tamanhoGrafo, ordemGrafo, &dist[0], &pais[0]);
+    if(respo == false){
+        cout <<"grafo possui ciclo negativo"<<endl;
     }
     
     if(write && orderSolution){
         ofstream writeFile;
         writeFile.open(outputFile, ofstream::out);
+        for(int i= 1; i < ordemGrafo+1; i++){
+            writeFile << i ;
+            for (int j = 1; j < ordemGrafo + 1; j++){
+                if(dist[j] == 100000){
+                    continue;
+                }else{
+                    for(int k = j; k != vertInicial; k = pais[k]){
+                        writeFile << dist[k] << " ";
+                    }
+                }
+            }
+            writeFile << endl;
+        }
         writeFile.close();
         return;
     }
@@ -72,11 +81,15 @@ void solutions (int** grafo, bool write, string outputFile, bool orderSolution, 
         writeFile.open(outputFile, ofstream::out);
         int sumCaminho=0;
 
-        for(int i = vertInicial; i < vertFinal; i++){
-            if(dist[i] == 100000){
-                continue;
-            }else{
-                sumCaminho += dist[i];
+        for(int i= 1; i < ordemGrafo+1; i++){
+            for (int j = 1; j < ordemGrafo + 1; j++){
+                if(dist[j] == 100000){
+                    continue;
+                }else{
+                    for(int k = j; k != vertInicial; k = pais[k]){
+                        sumCaminho += dist[k];
+                    }
+                }
             }
         }
 
@@ -85,16 +98,33 @@ void solutions (int** grafo, bool write, string outputFile, bool orderSolution, 
         return;
     }
     if(orderSolution){
-        //desenvolver
+        // desenvolver
+        for(int i= 1; i < ordemGrafo+1; i++){
+            cout << i ;
+            for (int j = 1; j < ordemGrafo + 1; j++){
+                if(dist[j] == 100000){
+                    continue;
+                }else{
+                    for(int k = j; k != vertInicial; k = pais[k]){
+                        cout << dist[k] << " ";
+                    }
+                }
+            }
+            cout << endl;
+        }
         return;
     }
 
     int sumCaminho=0;
-    for(int i = vertInicial; i < vertFinal; i++){
-        if(dist[i] == 100000){
-            continue;
-        }else{
-            sumCaminho += dist[i];
+    for(int i= 1; i < ordemGrafo+1; i++){
+        for (int j = 1; j < ordemGrafo + 1; j++){
+            if(dist[j] == 100000){
+                continue;
+            }else{
+                for(int k = j; k != vertInicial; k = pais[k]){
+                    sumCaminho += dist[k];
+                }
+            }
         }
     }
 
@@ -107,7 +137,7 @@ int main(int argc, char const *argv[]){
     int indiceFinal = 999;
     int tamanhoGrafo = 0;
     int ordemGrafo = 0;
-    int** grafo;
+    int grafo[1000][1000] = {};
     const int BUFFER_SIZE = 8;
     char buffer[BUFFER_SIZE];
     
@@ -116,7 +146,8 @@ int main(int argc, char const *argv[]){
     string opOrderSolution = "-s";
     string opStart = "-i";
     string opEnd = "-l";
-    string outputFile;
+    string outputFile = "saida";
+    string opHelp = "-h";
     
     bool read = false;
     bool write = false;
@@ -142,18 +173,10 @@ int main(int argc, char const *argv[]){
             
             //int grafo[tamanhoGrafo + 1][tamanhoGrafo+1]; 
             //ptrgrafo = &grafo[0][0];
-            grafo = new int* [tamanhoGrafo+1];
-            for(int i = 0; i < ordemGrafo+1; i++){
-                grafo[i] = new int [ordemGrafo+1];
-            };
+
 
             indiceFinal = ordemGrafo+1;
-            
-            for(int i = 0; i < tamanhoGrafo+1; i++){
-                for(int j = 0; j < ordemGrafo+1; j++){
-                    grafo[i][j] = INT_MAX;
-                }
-            }
+
             while (!fileInput.fail()){
                 fileInput.getline(buffer, BUFFER_SIZE);
                 
@@ -182,9 +205,17 @@ int main(int argc, char const *argv[]){
         if(argv[i] == opOrderSolution){
             orderSolution = true;
         }
+        if(argv[i] == opHelp){
+            cout << "Algoritmo de bellmanFord" << endl;
+            cout << "use -f <arquivo> para entrada de um grafo utilizando uma matriz de incidencia"<< endl;
+            cout << "use -o <arquivo> para redirecionar saida para \"arquivo\""<< endl;
+            cout << "use -s para exibir solucao ordenada"<< endl;
+            cout << "use -i <vertInicial> apos -o ou apos <arquivo> para indicar vertice inicial"<< endl;
+            cout << "use -l <vertFinal> apos -o ou apos <arquivo> para indicar vertice final"<< endl;
+            return 0;
+        }
     }
-    solutions(grafo, write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo, ordemGrafo);
-    free(grafo);
+    solutions(&grafo[0][0], write, outputFile, orderSolution, indiceInicial, indiceFinal, tamanhoGrafo, ordemGrafo);
     return 0;
     
 }
